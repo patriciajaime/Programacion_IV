@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Configuración de codificación de caracteres y vista responsiva en dispositivos móviles -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cumbre & Bosque | Tienda de Campismo</title>
+
+    <!-- Importación de la librería externa Chart.js mediante CDN para renderizar gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ==========================================================================
+           1. VARIABLES GLOBALES DE DISEÑO (PALETA DE COLORES CAMPISMO / OUTDOOR)
+           Permite mantener consistencia visual y facilitar cambios de tema.
+           ========================================================================== */
+        :root {
+            --verde-bosque: #1b4332;
+            --verde-pino: #2d6a4f;
+            --verde-hoja: #40916c;
+            --acento-fogata: #d97706;
+            --acento-hover: #b45309;
+            --rojo-alerta: #dc2626;
+            --rojo-hover: #991b1b;
+            --fondo-arena: #f4f6f0;
+            --tarjeta-blanca: #ffffff;
+            --texto-oscuro: #1f2937;
+            --texto-gris: #6b7280;
+            --borde-suave: #d1d5db;
+        }
+
+        /* Reinicio básico de márgenes y modelo de caja para todos los elementos */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--fondo-arena);
+            color: var(--texto-oscuro);
+            line-height: 1.6;
+        }
+
+        /* ==========================================================================
+           2. ESTILOS DEL ENCABEZADO Y CONTENEDOR PRINCIPAL
+           ========================================================================== */
+        header {
+            background: linear-gradient(135deg, var(--verde-bosque), var(--verde-pino));
+            color: white;
+            padding: 1.8rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-top: 0.3rem;
+        }
+
+        /* Contenedor centrado con ancho máximo para mantener legibilidad en pantallas grandes */
+        .contenedor {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ==========================================================================
+           3. TARJETAS DE INDICADORES CLAVE (KPIs)
+           ========================================================================== */
+        .grid-kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .tarjeta-kpi {
+            background: var(--tarjeta-blanca);
+            padding: 1.4rem;
+            border-radius: 10px;
+            border-left: 5px solid var(--verde-pino);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Variación visual para resaltar el indicador del producto más vendido */
+        .tarjeta-kpi.destacada {
+            border-left-color: var(--acento-fogata);
+        }
+
+        .tarjeta-kpi span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--texto-gris);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .tarjeta-kpi strong {
+            display: block;
+            font-size: 1.6rem;
+            color: var(--verde-bosque);
+            margin-top: 0.4rem;
+        }
+
+        /* ==========================================================================
+           4. PANELES DE GRÁFICAS (DASHBOARD CHART.JS)
+           ========================================================================== */
+        .grid-graficas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background: var(--tarjeta-blanca);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        .panel h2 {
+            color: var(--verde-bosque);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--fondo-arena);
+        }
+
+        /* Contenedor con altura fija necesaria para que Chart.js sea responsivo sin deformarse */
+        .contenedor-canvas {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        /* ==========================================================================
+           5. FORMULARIO DE REGISTRO Y TABLA DE INVENTARIO
+           ========================================================================== */
+        .formulario-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            padding: 0.65rem 0.8rem;
+            border: 1px solid var(--borde-suave);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--verde-pino);
+        }
+
+        /* Estilos base y variantes semánticas de botones */
+        button {
+            padding: 0.65rem 1.1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-agregar {
+            background-color: var(--verde-pino);
+            color: white;
+        }
+
+        .btn-agregar:hover {
+            background-color: var(--verde-bosque);
+        }
+
+        .btn-comprar {
+            background-color: var(--acento-fogata);
+            color: white;
+        }
+
+        .btn-comprar:hover {
+            background-color: var(--acento-hover);
+        }
+
+        .btn-comprar:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-eliminar {
+            background-color: var(--rojo-alerta);
+            color: white;
+            margin-left: 0.4rem;
+        }
+
+        .btn-eliminar:hover {
+            background-color: var(--rojo-hover);
+        }
+
+        /* Estructura visual de la tabla de catálogo */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+
+        th, td {
+            padding: 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        th {
+            background-color: var(--verde-bosque);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .input-cantidad {
+            width: 65px;
+            padding: 0.4rem;
+            text-align: center;
+            margin-right: 0.4rem;
+        }
+
+        /* Notificación flotante tipo "Toast" en la esquina inferior derecha */
+        #mensaje-estado {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 0.9rem 1.4rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        /* Adaptación para pantallas pequeñas (tablets y celulares) */
+        @media (max-width: 768px) {
+            .formulario-grid, .grid-graficas {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO DE IDENTIDAD DE LA TIENDA -->
+    <header>
+        <h1>Cumbre &amp; Bosque — Equipamiento Outdoor</h1>
+        <p>Sistema de Inventario en CSV, Analítica con Pandas y Dashboard en Tiempo Real</p>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL DE LA APLICACIÓN -->
+    <main class="contenedor">
+
+        <!-- SECCIÓN 1: TARJETAS DE INDICADORES CLAVE (KPIs) CONSUMIDOS DESDE PANDAS -->
+        <section class="grid-kpis" aria-label="Indicadores Clave de Rendimiento">
+            <div class="tarjeta-kpi">
+                <span>Ingresos Totales</span>
+                <strong id="kpi-ingresos">$0.00</strong>
+            </div>
+            <div class="tarjeta-kpi">
+                <span>Transacciones Realizadas</span>
+                <strong id="kpi-transacciones">0</strong>
+            </div>
+            <div class="tarjeta-kpi">
+                <span>Ticket Promedio</span>
+                <strong id="kpi-ticket">$0.00</strong>
+            </div>
+            <div class="tarjeta-kpi destacada">
+                <span>Producto Estrella</span>
+                <strong id="kpi-estrella" style="font-size: 1.2rem;">Cargando...</strong>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: LIENZOS (CANVAS) PARA LAS GRÁFICAS DINÁMICAS DE CHART.JS -->
+        <section class="grid-graficas" aria-label="Gráficas Analíticas de Ventas">
+            <div class="panel">
+                <h2>Ingresos por Artículo de Campismo ($)</h2>
+                <div class="contenedor-canvas">
+                    <canvas id="graficaProductos"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h2>Evolución de Ventas por Fecha ($)</h2>
+                <div class="contenedor-canvas">
+                    <canvas id="graficaFechas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: GESTIÓN DE INVENTARIO (ALTA, COMPRA Y ELIMINACIÓN EN CSV) -->
+        <section class="panel" aria-label="Gestión de Catálogo e Inventario">
+            <h2>Registrar Nuevo Equipo en Catálogo</h2>
+            <!-- Formulario para dar de alta un nuevo artículo mediante POST /productos -->
+            <form id="form-nuevo-producto" class="formulario-grid">
+                <input type="text" id="nuevo-nombre" placeholder="Nombre del equipo (ej. Brújula Profesional)" required>
+                <input type="number" id="nuevo-precio" placeholder="Precio ($)" step="0.01" min="1" required>
+                <input type="number" id="nuevo-stock" placeholder="Stock inicial" min="0" required>
+                <button type="submit" class="btn-agregar">+ Agregar Producto</button>
+            </form>
+
+            <h2>Inventario Disponible</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipo de Campismo</th>
+                            <th>Precio Unitario</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <!-- Cuerpo de tabla que se llena dinámicamente con JavaScript -->
+                    <tbody id="tabla-productos"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTENEDOR PARA ALERTAS VISUALES DE ÉXITO O ERROR -->
+    <div id="mensaje-estado" role="status"></div>
+
+    <!-- ==========================================================================
+         LÓGICA DEL CLIENTE WEB (CONSUMO DE API REST Y ACTUALIZACIÓN DEL DOM)
+         ========================================================================== -->
+    <script>
+        // Dirección base del servidor backend en FastAPI
+        const API_URL = "http://127.0.0.1:8000";
+
+        // Referencias globales a las instancias de Chart.js para destruirlas antes de redibujar
+        let chartProductosInstance = null;
+        let chartFechasInstance = null;
+
+        /**
+         * Muestra una notificación flotante temporal al usuario.
+         * @param {string} texto - Mensaje a mostrar.
+         * @param {boolean} esError - Define si el fondo será rojo (error) o verde (éxito).
+         */
+        function mostrarNotificacion(texto, esError = false) {
+            const box = document.getElementById("mensaje-estado");
+            box.textContent = texto;
+            box.style.backgroundColor = esError ? "#dc2626" : "#2d6a4f";
+            box.style.display = "block";
+
+            // Ocultar automáticamente después de 3.2 segundos
+            setTimeout(() => {
+                box.style.display = "none";
+            }, 3200);
+        }
+
+        /**
+         * Obtiene el catálogo actual desde GET /productos y construye las filas de la tabla.
+         */
+        async function cargarInventario() {
+            try {
+                const respuesta = await fetch(`${API_URL}/productos`);
+                const productos = await respuesta.json();
+                const tbody = document.getElementById("tabla-productos");
+
+                // Limpiar contenido previo antes de renderizar
+                tbody.innerHTML = "";
+
+                productos.forEach(prod => {
+                    const sinStock = prod.stock <= 0;
+                    const fila = document.createElement("tr");
+
+                    // Inyectar celdas con controles de compra (POST) y eliminación (DELETE)
+                    fila.innerHTML = `
+                        <td><strong>#${prod.id}</strong></td>
+                        <td>${prod.nombre}</td>
+                        <td>$${Number(prod.precio).toFixed(2)}</td>
+                        <td>${sinStock ? '<span style="color:#dc2626;font-weight:bold;">Agotado</span>' : prod.stock + ' uds.'}</td>
+                        <td>
+                            <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${prod.stock}" ${sinStock ? 'disabled' : ''}>
+                            <button class="btn-comprar" onclick="comprarProducto(${prod.id})" ${sinStock ? 'disabled' : ''}>Comprar</button>
+                            <button class="btn-eliminar" onclick="eliminarProducto(${prod.id})">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } catch (error) {
+                mostrarNotificacion("Error al conectar con el servidor FastAPI.", true);
+            }
+        }
+
+        /**
+         * Consulta los indicadores calculados por Pandas en GET /api/kpis y actualiza las tarjetas.
+         */
+        async function cargarKPIs() {
+            const respuesta = await fetch(`${API_URL}/api/kpis`);
+            const kpis = await respuesta.json();
+
+            document.getElementById("kpi-ingresos").textContent = `$${kpis.ingresos_totales.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`;
+            document.getElementById("kpi-transacciones").textContent = kpis.total_transacciones;
+            document.getElementById("kpi-ticket").textContent = `$${kpis.ticket_promedio.toLocaleString("es-MX", { minimumFractionDigits: 2 })}`;
+            document.getElementById("kpi-estrella").textContent = kpis.producto_estrella;
+        }
+
+        /**
+         * Consulta los endpoints analíticos de Pandas y renderiza ambas gráficas con Chart.js.
+         * Destruye las instancias anteriores para evitar superposición visual al actualizar.
+         */
+        async function cargarGraficas() {
+            // --- 1. Gráfica de Barras: Ingresos por Producto ---
+            const resProd = await fetch(`${API_URL}/api/graficas/productos`);
+            const datosProd = await resProd.json();
+
+            const ctxProd = document.getElementById("graficaProductos").getContext("2d");
+            if (chartProductosInstance) {
+                chartProductosInstance.destroy();
+            }
+
+            chartProductosInstance = new Chart(ctxProd, {
+                type: "bar",
+                data: {
+                    labels: datosProd.map(item => item.producto),
+                    datasets: [{
+                        label: "Ingresos Generados ($ MXN)",
+                        data: datosProd.map(item => item.monto_total),
+                        backgroundColor: "#2d6a4f",
+                        borderColor: "#1b4332",
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // --- 2. Gráfica de Líneas: Evolución de Ventas por Fecha ---
+            const resFechas = await fetch(`${API_URL}/api/graficas/fechas`);
+            const datosFechas = await resFechas.json();
+
+            const ctxFechas = document.getElementById("graficaFechas").getContext("2d");
+            if (chartFechasInstance) {
+                chartFechasInstance.destroy();
+            }
+
+            chartFechasInstance = new Chart(ctxFechas, {
+                type: "line",
+                data: {
+                    labels: datosFechas.map(item => item.fecha),
+                    datasets: [{
+                        label: "Ventas del Día ($ MXN)",
+                        data: datosFechas.map(item => item.monto_total),
+                        borderColor: "#d97706",
+                        backgroundColor: "rgba(217, 119, 6, 0.15)",
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: "#b45309"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        /**
+         * Registra una compra enviando POST /productos/{id} y refresca inventario, KPIs y gráficas.
+         * @param {number} id - Identificador único del producto a comprar.
+         */
+        async function comprarProducto(id) {
+            const inputCantidad = document.getElementById(`cant-${id}`);
+            const cantidad = parseInt(inputCantidad.value);
+
+            const respuesta = await fetch(`${API_URL}/productos/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cantidad })
+            });
+
+            const resultado = await respuesta.json();
+            if (!respuesta.ok) {
+                mostrarNotificacion(resultado.detail || "No se pudo completar la compra.", true);
+                return;
+            }
+
+            mostrarNotificacion(resultado.mensaje);
+            await actualizarDashboardCompleto();
+        }
+
+        /**
+         * Elimina un producto del archivo productos.csv enviando DELETE /productos/{id}.
+         * @param {number} id - Identificador único del producto a eliminar.
+         */
+        async function eliminarProducto(id) {
+            // Solicitar confirmación antes de borrar permanentemente del CSV
+            if (!confirm(`¿Seguro que deseas eliminar el producto #${id} del inventario?`)) return;
+
+            const respuesta = await fetch(`${API_URL}/productos/${id}`, {
+                method: "DELETE"
+            });
+
+            const resultado = await respuesta.json();
+            if (!respuesta.ok) {
+                mostrarNotificacion(resultado.detail || "Error al eliminar el producto.", true);
+                return;
+            }
+
+            mostrarNotificacion(resultado.mensaje);
+            await actualizarDashboardCompleto();
+        }
+
+        /**
+         * Escucha el envío del formulario de alta para crear un nuevo producto mediante POST /productos.
+         */
+        document.getElementById("form-nuevo-producto").addEventListener("submit", async (evento) => {
+            evento.preventDefault(); // Evita que el navegador recargue la página
+
+            const nuevoProducto = {
+                nombre: document.getElementById("nuevo-nombre").value,
+                precio: parseFloat(document.getElementById("nuevo-precio").value),
+                stock: parseInt(document.getElementById("nuevo-stock").value)
+            };
+
+            const respuesta = await fetch(`${API_URL}/productos`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(nuevoProducto)
+            });
+
+            const resultado = await respuesta.json();
+            if (!respuesta.ok) {
+                mostrarNotificacion("Verifica los datos ingresados.", true);
+                return;
+            }
+
+            evento.target.reset(); // Limpia los campos del formulario
+            mostrarNotificacion(resultado.mensaje);
+            await actualizarDashboardCompleto();
+        });
+
+        /**
+         * Función coordinadora que actualiza inventario, KPIs y gráficas en paralelo.
+         */
+        async function actualizarDashboardCompleto() {
+            await Promise.all([
+                cargarInventario(),
+                cargarKPIs(),
+                cargarGraficas()
+            ]);
+        }
+
+        // Disparar la carga inicial de datos en cuanto el documento HTML termina de cargarse
+        document.addEventListener("DOMContentLoaded", actualizarDashboardCompleto);
+    </script>
+</body>
+</html>
